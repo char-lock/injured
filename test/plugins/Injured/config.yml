@@ -1,0 +1,4 @@
+bleedParticleCount: 3
+bleedChance: 0.15
+bleedDuration: 2147483647
+bleedInterval: 1
