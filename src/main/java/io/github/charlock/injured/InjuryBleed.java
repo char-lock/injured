@@ -2,14 +2,21 @@ package io.github.charlock.injured;
 
 
 import java.util.Random;
+import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 // import org.bukkit.event.entity.EntityDamageEvent;
 // import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.Particle;
+import org.bukkit.Location;
+import org.bukkit.util.Vector;
+import org.bukkit.Color;
+
 
 // import net.kyori.adventure.text.Component;
 // import net.kyori.adventure.text.TextComponent;
@@ -45,7 +52,7 @@ public class InjuryBleed extends Injury{
         }
         int thisRoll = random.nextInt(chanceRange);
         injuredPlugin.getLogger().info("Bleed rolled a " + String.valueOf(thisRoll) + " --  under " + String.valueOf(chance) + " injures player.");
-        return thisRoll <= chance;  
+        return thisRoll <= chance;
     }
 
 
@@ -53,15 +60,35 @@ public class InjuryBleed extends Injury{
         // First, we need to calculate how much damage should be
         // applied to the given player.
         injuredPlugin.getLogger().info("Applying bleed damage to " + player.getName() + ".");
-        double damage = player.getHealth() * damagePercent;
+        double damage = player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue() * damagePercent;
+        injuredPlugin.getLogger().info("Has " + String.valueOf(player.getHealth()) + " -- hitting for " + String.valueOf(damage) + ".");
+        if (player.getHealth() >= damage) {
+            player.setHealth(player.getHealth() - damage);
+        } else {
+            player.setHealth(0);
+        }
+        showParticles(player);
+    }
 
-        
+
+    public void showParticles(Player player) {
+        Location where = player.getEyeLocation();
+        Vector dirOffset = player.getLocation().getDirection();
+        // Moves bleeding effect into the player line-of-sight.
+        dirOffset.setX(dirOffset.getX() * 0.25);
+        dirOffset.setY(dirOffset.getY() * 0.25);
+        dirOffset.setZ(dirOffset.getZ() * 0.25);
+        where.setX(where.getX() + dirOffset.getX());
+        where.setY(where.getY() + dirOffset.getY());
+        where.setZ(where.getZ() + dirOffset.getZ());
+        Particle.DustOptions blood = new Particle.DustOptions(Color.RED, 1.00f);
+        player.spawnParticle(Particle.REDSTONE, where, 25, 0, 0, 0, blood);
     }
 
 
     @Override
-    public void onEffect(Player player) {
-        injuredPlugin.getLogger().info(player.getName() + " is bleeding out.");
-        applyDamage(player);
+    public void onEffect(UUID playerId) {
+        injuredPlugin.getLogger().info(Bukkit.getPlayer(playerId).getName() + " is bleeding out.");
+        applyDamage(Bukkit.getPlayer(playerId));
     }
 }

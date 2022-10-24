@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Arrays;
 
+import org.bukkit.ChatColor;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -64,6 +65,7 @@ public class InjuryDamageListener implements Listener{
                         if (injuries.get(i).onRoll(cause)) {
                             injuredPlugin.getLogger().info("Bad luck! Applying bleed to " + playerName + ".");
                             injuryCaptain.addInjury(player, injuries.get(i));
+                            player.sendMessage(ChatColor.RED + "You are bleeding -- patch it up quick, or you will die!");
                         } else {
                             injuredPlugin.getLogger().info("Phew! " + playerName + " rolled high enough to not get bleed.");    
                         }

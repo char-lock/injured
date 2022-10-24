@@ -27,8 +27,11 @@ public class Injured extends JavaPlugin {
         saveConfig();
         // Update any Captain singletons with the plugin instance.
         InjuryCaptain.updatePlugin(this);
+        InjuryCaptain.getCaptain().updateInjuries();
         // Regiser all event listeners.
         getServer().getPluginManager().registerEvents(new InjuryDamageListener(), this);
+        getServer().getPluginManager().registerEvents(new InjuryDeathListener(), this);
+        getServer().getPluginManager().registerEvents(new InjuryHealListener(), this);
         // Define command executors.
         // getCommand("injure").setExecutor(new CommandHandler(this));
         // getCommand("uninjure").setExecutor(new CommandHandler(this));

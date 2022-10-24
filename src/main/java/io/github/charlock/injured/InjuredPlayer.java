@@ -54,11 +54,6 @@ public class InjuredPlayer {
     }
 
     public boolean hasInjury(Injury injury) {
-        if (injuries.containsKey(injury.injuryType)) {
-            if (injuries.get(injury.injuryType) == injury) {
-                return true;
-            }
-        }
-        return false;
+        return injuries.containsKey(injury.injuryType);
     }
 }
