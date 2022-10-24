@@ -1,45 +1,64 @@
 package io.github.charlock.injured;
 
-import java.util.Set;
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.UUID;
-import org.bukkit.entity.Player;
+
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
 
 public class InjuredPlayer {
-    enum InjuredPlayerFlag {
-        BLEEDING,
-        CRIPPLED
-    }
-
-    private final Set<InjuredPlayerFlag> injuries = new HashSet<>();
     private final UUID uuid;
+    private Map<InjuryType, Injury> injuries = new HashMap<InjuryType, Injury>();
 
     public InjuredPlayer(Player player) {
         this.uuid = player.getUniqueId();
     }
 
     public Player getPlayer() {
-        return Bukkit.getPlayer(uuid);
+        return Bukkit.getPlayer(this.uuid);
     }
 
-    public void addInjury(InjuredPlayerFlag injury) {
-        Bukkit.getLogger().info("Adding injury " + injury.name() + " to " + this.getPlayer().getName() + ".");
-        this.injuries.add(injury);
+    public Collection<Injury> getInjuries() {
+        return injuries.values();
     }
 
-    public boolean hasInjury(InjuredPlayerFlag injury) {
-        return this.injuries.contains(injury);
-    }
-
-    public void removeInjury(InjuredPlayerFlag injury) {
-        Bukkit.getLogger().info("Removing injury " + injury.name() + " from " + this.getPlayer().getName() + ".");
-        if (this.hasInjury(injury)) {
-            this.injuries.remove(injury);
+    public void addInjury(Injury injury, boolean overwrite) {
+        if (injuries.containsKey(injury.injuryType)) {
+            if (overwrite) {
+                injuries.replace(injury.injuryType, injury);
+            }
+        } else {
+            injuries.put(injury.injuryType, injury);
         }
     }
 
+    public void addInjury(Injury injury) {
+        this.addInjury(injury, false);
+    }
+
     public void clearInjuries() {
-        this.injuries.clear();
+        injuries.clear();
+    }
+
+    public void removeInjury(InjuryType injType) {
+        if (injuries.containsKey(injType)) {
+            injuries.remove(injType);
+        }
+    }
+
+    public void removeInjury(Injury injury) {
+        this.removeInjury(injury.injuryType);
+    }
+
+    public boolean hasInjury(Injury injury) {
+        if (injuries.containsKey(injury.injuryType)) {
+            if (injuries.get(injury.injuryType) == injury) {
+                return true;
+            }
+        }
+        return false;
     }
 }

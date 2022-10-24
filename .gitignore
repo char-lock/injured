@@ -1,10 +1,10 @@
 # Gradle files
-/.gradle/
+.gradle/
 *.lock
 *.bin
 
 # Test files
-/test/
+test/
 
 # Compiled class file
 *.class

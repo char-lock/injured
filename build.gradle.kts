@@ -1,6 +1,7 @@
 plugins {
     application
     `java`
+    id("io.papermc.paperweight.userdev") version "1.3.5"
 }
 
 repositories {
@@ -13,8 +14,8 @@ repositories {
 }
 
 dependencies {
+    paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.19.2-R0.1-SNAPSHOT")
     compileOnly("io.papermc.paper:paper-api:1.19.2-R0.1-SNAPSHOT")
-    compileOnly("org.spigotmc:spigot-api:1.19.2-R0.1-SNAPSHOT")
 }
 
 java {

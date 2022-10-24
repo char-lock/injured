@@ -1,0 +1,11 @@
+pluginManagement {
+    repositories {
+        mavenCentral()
+        maven {
+            url = "https://repo.papermc.io/repository/maven-public/"
+        }
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'Injured'

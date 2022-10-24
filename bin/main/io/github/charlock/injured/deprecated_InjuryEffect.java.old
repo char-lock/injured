@@ -1,0 +1,134 @@
+package io.github.charlock.injured;
+
+
+import org.bukkit.configuration.file.FileConfiguration;
+
+
+public class InjuryEffect {
+    private Injured plugin;
+    private FileConfiguration config;
+
+    private InjuryEffectType injuryType;
+
+    private double duration;
+    private int interval;
+    private double damage;
+    private double chance;
+    
+    private String messageApplied;
+    private String messageRemoved;
+    private String messageDeath;
+
+
+    public InjuryEffect(Injured plugin, InjuryEffectType injuryType) {
+        // Setup the variables related to the parent plugin.
+        this.plugin = plugin;
+        this.config = this.plugin.getConfig();
+
+        // Now, we can initialise the rest of this particular injury.
+        this.injuryType = injuryType;
+        if (injuryType == InjuryEffectType.BLEEDING) {
+            this.duration = this.config.getDouble("bleedDuration");
+            this.interval = this.config.getInt("bleedInterval");
+            this.damage = this.config.getDouble("bleedDamage");
+            this.chance = this.config.getDouble("bleedChance");
+            this.messageApplied = this.config.getString("bleedMessageInjured");
+            this.messageRemoved = this.config.getString("bleedMessageHealed");
+            this.messageDeath = this.config.getString("bleedMessageDead");
+        } else {
+            this.duration = 0.00;
+            this.interval = 0;
+            this.damage = 0;
+            this.chance = 0.00;
+            this.messageApplied = "";
+            this.messageRemoved = "";
+            this.messageDeath = "";
+        }
+    }
+
+    public InjuryEffect(
+        Injured plugin, InjuryEffectType injuryType,
+        double duration
+    ) {
+        this(plugin, injuryType);
+        this.duration = duration;
+    }
+
+    public InjuryEffect(
+        Injured plugin, InjuryEffectType injuryType,
+        double duration, double damage
+    ) {
+        this(plugin, injuryType, duration);
+        this.damage = damage;
+    }
+
+    public InjuryEffect(
+        Injured plugin, InjuryEffectType injuryType,
+        double duration, double damage, int interval
+    ) {
+        this(plugin, injuryType, duration, damage);
+        this.interval = interval;
+    }
+
+    public InjuryEffect(
+        Injured plugin, InjuryEffectType injuryType,
+        double duration, double damage, int interval, double chance
+    ) {
+        this(plugin, injuryType, duration, damage, interval);
+        this.chance = chance;
+    }
+    
+    public InjuryEffect(
+        Injured plugin, InjuryEffectType injuryType,
+        String messageApply, String messageRemove, String messageDead
+    ) {
+        this(plugin, injuryType);
+        this.messageApplied = messageApply;
+        this.messageRemoved = messageRemove;
+        this.messageDeath = messageDead;
+    }
+
+    public InjuryEffect(
+        Injured plugin, InjuryEffectType injuryType,
+        double duration, double damage, int interval, double chance,
+        String messageApply, String messageRemove, String messageDead
+    ) {
+        this(plugin, injuryType, duration, damage, interval, chance);
+        this.messageApplied = messageApply;
+        this.messageRemoved = messageRemove;
+        this.messageDeath = messageDead;
+    }
+
+
+    public double duration() {
+        return this.duration;
+    }
+
+    public int interval() {
+        return this.interval;
+    }
+
+    public double damage() {
+        return this.damage;
+    }
+
+    public double chance() {
+        return this.chance;
+    }
+
+    public String messageApplied() {
+        return this.messageApplied;
+    }
+
+    public String messageRemoved() {
+        return this.messageRemoved;
+    }
+
+    public String messageDeath() {
+        return this.messageDeath;
+    }
+
+    public InjuryEffectType injuryType() {
+        return this.injuryType;
+    }
+}
