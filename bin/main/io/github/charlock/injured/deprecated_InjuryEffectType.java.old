@@ -1,6 +1,0 @@
-package io.github.charlock.injured;
-
-public enum InjuryEffectType {
-    BLEEDING,
-    CRIPPLED
-}

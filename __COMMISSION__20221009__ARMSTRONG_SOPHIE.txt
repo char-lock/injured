@@ -85,3 +85,9 @@ Add a scheduled cull of the injuredPlayers list to see when someone on it last l
 
 
 player.spawnParticle(Particle.REDSTONE, where, bleedParticleCount);
+
+
+>> Fix item check error.
+>> Add duration.
+>> Add crippling injury
+>> Add "splint" as cure for crippling.

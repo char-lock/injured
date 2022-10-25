@@ -1,6 +1,6 @@
 name: Injured
-version: 1.0.0
-main: io.github.charlock.injured.Injured
+version: 1.1.0
+main: io.github.charlock.injured.InjuredPlugin
 description: A plugin for PaperMC to enable a mild injury system.
 author: Charlotte Lockett <cflockett4@gmail.com>
 website: https://github.com/char-lock/injured

@@ -1,4 +1,4 @@
-package io.github.charlock.injured;
+package io.github.charlock.injured.injury;
 
 public enum InjuryType {
     BLEEDING,
