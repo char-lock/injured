@@ -45,6 +45,10 @@ public class InjuryDeathListener implements Listener {
 
         if (this.injuryCaptain.trackingPlayer(e.getEntity())) {
             this.injuredPlugin.debugInfo("Clearing all injuries from " + e.getEntity().getName() + " ...");
+            if (this.injuryCaptain.hasInjury(e.getEntity(), InjuryType.CRIPPLED)) {
+                float slowPercent = (float)this.injuredPlugin.getConfig().getDouble("injuries.crippled.slowPercent");
+                e.getEntity().setWalkSpeed(e.getEntity().getWalkSpeed() / slowPercent);
+            }
             this.injuryCaptain.clearInjuries(e.getEntity());
         }
     }

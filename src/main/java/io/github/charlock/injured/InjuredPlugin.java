@@ -15,6 +15,7 @@ public class InjuredPlugin extends JavaPlugin {
     /** 
      * Constructor for the Injured plugin to ensure that it gets the 
      * user configuration as soon as it is initialised.
+     * 
      */
     public InjuredPlugin() {
         userConfig = this.getConfig();
@@ -23,6 +24,7 @@ public class InjuredPlugin extends JavaPlugin {
     /**
      * Checks the configured debug setting and prints a message to
      * the console if enabled.
+     * 
      * 
      * @param message       what to print to the console if in debug.
      * 

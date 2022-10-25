@@ -1,6 +1,8 @@
 package io.github.charlock.injured;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 
@@ -11,6 +13,8 @@ import io.github.charlock.injured.event.InjuryCancelEvent;
 import io.github.charlock.injured.event.listener.InjuryDamageListener;
 import io.github.charlock.injured.event.listener.InjuryDeathListener;
 import io.github.charlock.injured.event.listener.InjuryHealListener;
+import io.github.charlock.injured.event.listener.InjuryJoinListener;
+import io.github.charlock.injured.event.listener.InjuryQuitListener;
 import io.github.charlock.injured.injury.Injury;
 import io.github.charlock.injured.injury.Bleed;
 import io.github.charlock.injured.injury.Crippled;
@@ -75,6 +79,8 @@ public class InjuryCaptain {
         injuredPlugin.getServer().getPluginManager().registerEvents(new InjuryDamageListener(), injuredPlugin);
         injuredPlugin.getServer().getPluginManager().registerEvents(new InjuryDeathListener(), injuredPlugin);
         injuredPlugin.getServer().getPluginManager().registerEvents(new InjuryHealListener(), injuredPlugin);
+        injuredPlugin.getServer().getPluginManager().registerEvents(new InjuryQuitListener(), injuredPlugin);
+        injuredPlugin.getServer().getPluginManager().registerEvents(new InjuryJoinListener(), injuredPlugin);
     }
 
     /**
@@ -163,6 +169,22 @@ public class InjuryCaptain {
     }
 
     /**
+     * Returns a Collection containing all of the injuries currently
+     * assigned to a player.
+     * 
+     * 
+     * @param playerId      id of player for which to get injuries
+     * 
+     */
+    public Collection<Injury> getInjuries(UUID playerId) {
+        if (this.trackingPlayer(playerId)) {
+            return this.injuredPlayers.get(playerId).getInjuries();
+        } else {
+            return new HashSet<Injury>();
+        }
+    }
+
+    /**
      * Adds an injury to a player.
      * 
      * 
@@ -182,6 +204,9 @@ public class InjuryCaptain {
         injury.onEffect(playerId, true);
         if (injury.isScheduled()) {
             this.scheduleInjury(playerId, injury);
+        }
+        if (injury.getDuration() > 0) {
+            new InjuryTimerTask(playerId, injury.getType()).runTaskLater(this.getPlugin(), injury.getDuration());
         }
     }
 
@@ -207,7 +232,7 @@ public class InjuryCaptain {
      * @param injury        injury with which to injure player
      * 
      */
-    private void scheduleInjury(UUID playerId, Injury injury) {
+    public void scheduleInjury(UUID playerId, Injury injury) {
         this.cancelInjury(playerId, injury.getType());
         if (injury.hasInterval()) {
             new InjuryTask(
@@ -287,7 +312,7 @@ public class InjuryCaptain {
      * @param injType       type of injury to cancel
      * 
      */
-    private void cancelInjury(UUID playerId, InjuryType injType) {
+    public void cancelInjury(UUID playerId, InjuryType injType) {
         InjuryCancelEvent cancel = new InjuryCancelEvent(playerId, injType);
         this.getPlugin().getServer().getPluginManager().callEvent(cancel);
         if (cancel.isCancelled()) {
