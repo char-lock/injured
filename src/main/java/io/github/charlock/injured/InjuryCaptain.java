@@ -32,6 +32,10 @@ public class InjuryCaptain {
     private Map<InjuryType, Injury> injuries;
 
    
+    /** 
+     * Constructor for InjuryCaptain
+     * 
+     */
     private InjuryCaptain() {
         injuredPlayers = new HashMap<UUID, InjuredPlayer>();
         injuries = new HashMap<InjuryType, Injury>();

@@ -71,6 +71,8 @@ public class InjuredPlugin extends JavaPlugin {
         userConfig.createSection("remedies.splint");
         userConfig.addDefault("remedies.splint.label", "Splint");
         // End of User Configuration
+        userConfig.options().copyDefaults(true);
+        saveConfig();
         // Update any Captain singletons with the plugin instance.
         InjuryCaptain.updatePlugin(this);
         InjuryCaptain.getCaptain().updateInjuries();

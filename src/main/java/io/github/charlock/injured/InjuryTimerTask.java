@@ -22,6 +22,15 @@ public class InjuryTimerTask extends BukkitRunnable implements Listener {
     private UUID injured;
     private InjuryType injuryType;
 
+    /**
+     * Constructor for InjuryTimerTask.
+     * 
+     * 
+     * @param playerId      id of player to schedule timer
+     * 
+     * @param injType       type of injury to remedy once time is up.
+     * 
+     */
     public InjuryTimerTask(UUID playerId, InjuryType injType) {
         this.injured = playerId;
         this.injuryType = injType;
