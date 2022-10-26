@@ -2,6 +2,8 @@
 .gradle/
 *.lock
 *.bin
+build/
+bin/
 
 # Old files
 *.old
