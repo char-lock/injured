@@ -36,6 +36,8 @@ public class InjuryJoinListener implements Listener {
                     new InjuryTimerTask(playerId, i.getType()).runTaskLater(this.injuredPlugin, i.getDuration());
                 }
             }
+        } else {
+            this.injuryCaptain.trackPlayer(e.getPlayer().getUniqueId());
         }
     }
 }

@@ -14,6 +14,7 @@ import io.github.charlock.injured.event.listener.InjuryDamageListener;
 import io.github.charlock.injured.event.listener.InjuryDeathListener;
 import io.github.charlock.injured.event.listener.InjuryHealListener;
 import io.github.charlock.injured.event.listener.InjuryJoinListener;
+import io.github.charlock.injured.event.listener.InjuryVelocityListener;
 import io.github.charlock.injured.event.listener.InjuryQuitListener;
 import io.github.charlock.injured.injury.Injury;
 import io.github.charlock.injured.injury.Bleed;
@@ -85,6 +86,7 @@ public class InjuryCaptain {
         injuredPlugin.getServer().getPluginManager().registerEvents(new InjuryHealListener(), injuredPlugin);
         injuredPlugin.getServer().getPluginManager().registerEvents(new InjuryQuitListener(), injuredPlugin);
         injuredPlugin.getServer().getPluginManager().registerEvents(new InjuryJoinListener(), injuredPlugin);
+        injuredPlugin.getServer().getPluginManager().registerEvents(new InjuryVelocityListener(), injuredPlugin);
     }
 
     /**
@@ -93,6 +95,30 @@ public class InjuryCaptain {
      */
     public InjuredPlugin getPlugin() {
         return injuredPlugin;
+    }
+
+    /**
+     * Adds a player to the tracked list.
+     * 
+     * 
+     * @param playerId      id of player to add
+     * 
+     */
+    public void trackPlayer(UUID playerId) {
+        if (!this.trackingPlayer(playerId)) {
+            this.injuredPlayers.put(playerId, new InjuredPlayer(playerId));
+        }
+    }
+
+    /**
+     * Adds a player to the tracked list.
+     * 
+     * 
+     * @param player        player to add
+     * 
+     */
+    public void trackPlayer(Player player) {
+        this.trackPlayer(player.getUniqueId());
     }
 
     /**
@@ -163,13 +189,69 @@ public class InjuryCaptain {
      * Returns whether or not a player has an injury.
      * 
      * 
-     * @param playerId      player to check for injury
+     * @param player        player to check for injury
      * 
-     * @param injType       injury for which to check
+     * @param inj           injury for which to check
      * 
      */
     public boolean hasInjury(Player player, Injury injury) {
         return this.hasInjury(player.getUniqueId(), injury.getType());
+    }
+
+    /**
+     * Returns the target walk speed for an injured player.
+     * 
+     * 
+     * @param playerId      id of player to check
+     * 
+     */
+    public float getInjuredSpeed(UUID playerId) {
+        if (this.trackingPlayer(playerId)) {
+            return this.injuredPlayers.get(playerId).getInjuredSpeed();
+        } else {
+            return Bukkit.getPlayer(playerId).getWalkSpeed();
+        }
+    }
+
+    /**
+     * Returns the target walk speed for an injured player.
+     * 
+     * 
+     * @param player        player to check
+     * 
+     */
+    public float getInjuredSpeed(Player player) {
+        return this.getInjuredSpeed(player.getUniqueId());
+    }
+
+    /**
+     * Sets the target walk speed for an injured player.
+     * 
+     * 
+     * @param playerId      id of player to change speed
+     * 
+     * @param walkSpeed     new target walkSpeed
+     * 
+     */
+    public void setInjuredSpeed(UUID playerId, float walkSpeed) {
+        if (this.trackingPlayer(playerId)) {
+            InjuredPlayer currentPlayer = this.injuredPlayers.get(playerId);
+            currentPlayer.setInjuredSpeed(walkSpeed);
+            this.injuredPlayers.replace(playerId, currentPlayer);
+        }
+    }
+
+    /**
+     * Sets the target walk speed for an injured player.
+     * 
+     * 
+     * @param player        player to change speed
+     * 
+     * @param walkSpeed     new target walkSpeed
+     * 
+     */
+    public void setInjuredSpeed(Player player, float walkSpeed) {
+        this.setInjuredSpeed(player.getUniqueId(), walkSpeed);
     }
 
     /**
@@ -198,19 +280,38 @@ public class InjuryCaptain {
      * 
      */
     public void addInjury(UUID playerId, Injury injury) {
-        this.getPlugin().debugInfo("(InjuryCaptain) Adding [" + injury.getName() + "] to " + Bukkit.getPlayer(playerId).getName() + " ...");
-        if (!trackingPlayer(playerId)) {
-            injuredPlayers.put(playerId, new InjuredPlayer(playerId));
+        if (!this.hasInjury(playerId, injury)) {
+            this.getPlugin().debugInfo("(InjuryCaptain) Adding [" + injury.getName() + "] to " + Bukkit.getPlayer(playerId).getName() + " ...");
+            if (!trackingPlayer(playerId)) {
+                injuredPlayers.put(playerId, new InjuredPlayer(playerId));
+            }
+            InjuredPlayer currentInjuries = injuredPlayers.get(playerId);
+            currentInjuries.addInjury(injury);
+            injuredPlayers.replace(playerId, currentInjuries);
+            injury.onEffect(playerId, true);
+            if (injury.isScheduled()) {
+                this.scheduleInjury(playerId, injury);
+            }
+            if (injury.getDuration() > 0) {
+                new InjuryTimerTask(playerId, injury.getType()).runTaskLater(this.getPlugin(), injury.getDuration());
+            }
+        } else {
+            this.getPlugin().debugInfo("(InjuryCaptain) " + Bukkit.getPlayer(playerId) + " already has [" + injury.getName() + "].");
         }
-        InjuredPlayer currentInjuries = injuredPlayers.get(playerId);
-        currentInjuries.addInjury(injury);
-        injuredPlayers.replace(playerId, currentInjuries);
-        injury.onEffect(playerId, true);
-        if (injury.isScheduled()) {
-            this.scheduleInjury(playerId, injury);
-        }
-        if (injury.getDuration() > 0) {
-            new InjuryTimerTask(playerId, injury.getType()).runTaskLater(this.getPlugin(), injury.getDuration());
+    }
+
+    /**
+     * Returns the original speed of a player before injury.
+     * 
+     * 
+     * @param playerId      id of player for which to check
+     * 
+     */
+    public float getOriginalSpeed(UUID playerId) {
+        if (this.trackingPlayer(playerId)) {
+            return this.injuredPlayers.get(playerId).getOriginalSpeed();
+        } else {
+            return Bukkit.getPlayer(playerId).getWalkSpeed();
         }
     }
 

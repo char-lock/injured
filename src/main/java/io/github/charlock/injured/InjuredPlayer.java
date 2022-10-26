@@ -21,6 +21,8 @@ public class InjuredPlayer {
     // Store only the UUID to prevent a memory leak.
     private final UUID uuid;
     private Map<InjuryType, Injury> injuries;
+    private float originalSpeed;
+    private float currentSpeed;
 
     /**
      * Constructor for an injured player from a player's UUID.
@@ -32,6 +34,8 @@ public class InjuredPlayer {
     public InjuredPlayer(UUID playerId) {
         injuries = new HashMap<InjuryType, Injury>();
         this.uuid = playerId;
+        this.originalSpeed = Bukkit.getPlayer(playerId).getWalkSpeed();
+        this.currentSpeed = this.originalSpeed;
     }
 
     /**
@@ -51,6 +55,44 @@ public class InjuredPlayer {
      */
     public Player getPlayer() {
         return Bukkit.getPlayer(this.uuid);
+    }
+
+    /**
+     * Returns a player's original speed at the time of first instance.
+     * 
+     */
+    public float getOriginalSpeed() {
+        return this.originalSpeed;
+    }
+
+    /**
+     * Sets a player's original walk speed.
+     * 
+     * 
+     * @param walkSpeed     speed of player
+     * 
+     */
+    public void setOriginalSpeed(float walkSpeed) {
+        this.originalSpeed = walkSpeed;
+    }
+
+    /**
+     * Gets a player's target speed according to injury.
+     * 
+     */
+    public float getInjuredSpeed() {
+        return this.currentSpeed;
+    }
+
+    /**
+     * Sets a player's target speed according to injury.
+     * 
+     * 
+     * @param walkSpeed     target speed for player
+     * 
+     */
+    public void setInjuredSpeed(float walkSpeed) {
+        this.currentSpeed = walkSpeed;
     }
 
     /**

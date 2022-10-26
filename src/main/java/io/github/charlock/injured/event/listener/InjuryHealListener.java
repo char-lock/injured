@@ -59,8 +59,9 @@ public class InjuryHealListener implements Listener {
                             + " 1 from their inventory ..."
                         );
                         this.injuryCaptain.getInjuryMapping().get(InjuryType.CRIPPLED).sendRemedyMessage(e.getPlayer());
-                        float slowPercent = (float)this.injuredPlugin.getConfig().getDouble("injuries.crippled.slowPercent");
-                        e.getPlayer().setWalkSpeed(e.getPlayer().getWalkSpeed() / slowPercent);
+                        float originalSpeed = this.injuryCaptain.getOriginalSpeed(e.getPlayer().getUniqueId());
+                        this.injuryCaptain.setInjuredSpeed(e.getPlayer().getUniqueId(), originalSpeed);
+                        e.getPlayer().setWalkSpeed(originalSpeed);
                         this.injuryCaptain.removeInjury(e.getPlayer().getUniqueId(), InjuryType.CRIPPLED);
                         heldItem.setAmount(heldItem.getAmount() - 1);
                     }

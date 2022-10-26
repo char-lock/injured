@@ -12,6 +12,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 
+import io.github.charlock.injured.InjuryCaptain;
 
 /**
  * A type of Injury that slows the player's movement to the configured
@@ -66,6 +67,7 @@ public class Crippled extends Injury {
     public void onEffect(UUID playerId, boolean first) {
         float playerSpeed = Bukkit.getPlayer(playerId).getWalkSpeed();
         float crippledSpeed = playerSpeed * (float)this.slowPercent;
+        InjuryCaptain.getCaptain().setInjuredSpeed(playerId, crippledSpeed);
         Bukkit.getPlayer(playerId).setWalkSpeed(crippledSpeed);
         if (first && this.soundOnInjure) {
             Bukkit.getPlayer(playerId).playSound(Bukkit.getPlayer(playerId).getEyeLocation(), Sound.BLOCK_HONEY_BLOCK_BREAK, SoundCategory.AMBIENT, 1.0f, 1.0f);

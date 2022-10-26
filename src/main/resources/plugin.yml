@@ -8,7 +8,10 @@ api-version: 1.19
 commands:
   injure:
     description: Apply an injury to a player.
-    usage: Syntax Error! /injure [player] [injury]
+    usage: /injure [player] [injury]
   uninjure:
     description: Remove an injury from a player.
-    usage: Syntax Error! /uninjure [player] [injury]
+    usage: /uninjure [player] [injury]
+  resetspeed:
+    description: Reset a player's speed to the default value.
+    usage: /resetspeed [player]

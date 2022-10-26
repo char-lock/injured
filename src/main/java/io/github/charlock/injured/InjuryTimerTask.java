@@ -68,6 +68,7 @@ public class InjuryTimerTask extends BukkitRunnable implements Listener {
 
     @EventHandler
     public void onInjuryCancel(InjuryCancelEvent e) {
+        this.injuredPlugin.debugInfo("(InjuryTimerTask) Heard cancel event.");
         if (this.injured == e.getInjuredId() && this.injuryType == e.getInjuryType()) {
             this.cancel();
             InjuryCancelEvent.getHandlerList().unregister(this);

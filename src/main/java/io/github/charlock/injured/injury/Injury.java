@@ -35,7 +35,7 @@ public abstract class Injury {
         this.pluginInjured = this.injuryCaptain.getPlugin();
         this.causes = new HashSet<DamageCause>();
         this.injuryType = injType;
-        this.tickDuration = Integer.MAX_VALUE;
+        this.tickDuration = -1;
     }
 
     public InjuredPlugin getPlugin() {
