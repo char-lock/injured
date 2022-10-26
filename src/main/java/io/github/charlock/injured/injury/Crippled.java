@@ -43,6 +43,14 @@ public class Crippled extends Injury {
         this.onRemedyMessage = userConfig.getString("injuries.crippled.onRemedyMessage");
     }
 
+    /**
+     * Returns the currently set percentage to slow the player to.
+     * 
+     */
+    public double getSlowPercent() {
+        return this.slowPercent;
+    }
+
     @Override
     public boolean hasInterval() {
         return false;

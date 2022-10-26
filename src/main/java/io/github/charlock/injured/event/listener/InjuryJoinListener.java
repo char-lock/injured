@@ -39,5 +39,9 @@ public class InjuryJoinListener implements Listener {
         } else {
             this.injuryCaptain.trackPlayer(e.getPlayer().getUniqueId());
         }
+        this.injuredPlugin.debugInfo("(InjuryLoginListener) Checking speed at login ...");
+        if (e.getPlayer().getWalkSpeed() != 0.2f) {
+            e.getPlayer().setWalkSpeed(0.2f);
+        }
     }
 }

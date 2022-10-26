@@ -19,7 +19,7 @@ public class InjuredPlugin extends JavaPlugin {
      * 
      */
     public InjuredPlugin() {
-        userConfig = this.getConfig();
+        this.userConfig = this.getConfig();
     }
 
     /**

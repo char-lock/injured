@@ -167,7 +167,8 @@ public class Bleed extends Injury {
 
     @Override
     public void onEffect(UUID playerId, boolean first) {
-        if (Bukkit.getPlayer(playerId).getGameMode() == GameMode.SURVIVAL) {
+        if (Bukkit.getPlayer(playerId).getGameMode() != GameMode.CREATIVE
+            && Bukkit.getPlayer(playerId).getGameMode() != GameMode.SPECTATOR) {
             this.getPlugin().debugInfo("(Injured.Bleed) " + Bukkit.getPlayer(playerId).getName() + " is bleeding.");
             this.applyDamage(playerId);
             if (first && this.soundOnInjury) {
@@ -176,7 +177,7 @@ public class Bleed extends Injury {
                 Bukkit.getPlayer(playerId).playSound(Bukkit.getPlayer(playerId).getEyeLocation(), Sound.BLOCK_HONEY_BLOCK_SLIDE, SoundCategory.AMBIENT, 1.0f, 1.0f);
             }
         } else {
-            this.getPlugin().debugInfo("(Injured.Bleed) " + Bukkit.getPlayer(playerId).getName() + " is not in Survival mode. Will not damage them.");
+            this.getPlugin().debugInfo("(Injured.Bleed) " + Bukkit.getPlayer(playerId).getName() + " is in Creative mode. Will not damage them.");
         }
     }
 

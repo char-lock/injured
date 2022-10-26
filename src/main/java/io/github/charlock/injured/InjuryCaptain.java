@@ -14,7 +14,7 @@ import io.github.charlock.injured.event.listener.InjuryDamageListener;
 import io.github.charlock.injured.event.listener.InjuryDeathListener;
 import io.github.charlock.injured.event.listener.InjuryHealListener;
 import io.github.charlock.injured.event.listener.InjuryJoinListener;
-import io.github.charlock.injured.event.listener.InjuryVelocityListener;
+import io.github.charlock.injured.event.listener.InjuryMoveListener;
 import io.github.charlock.injured.event.listener.InjuryQuitListener;
 import io.github.charlock.injured.injury.Injury;
 import io.github.charlock.injured.injury.Bleed;
@@ -86,7 +86,7 @@ public class InjuryCaptain {
         injuredPlugin.getServer().getPluginManager().registerEvents(new InjuryHealListener(), injuredPlugin);
         injuredPlugin.getServer().getPluginManager().registerEvents(new InjuryQuitListener(), injuredPlugin);
         injuredPlugin.getServer().getPluginManager().registerEvents(new InjuryJoinListener(), injuredPlugin);
-        injuredPlugin.getServer().getPluginManager().registerEvents(new InjuryVelocityListener(), injuredPlugin);
+        injuredPlugin.getServer().getPluginManager().registerEvents(new InjuryMoveListener(), injuredPlugin);
     }
 
     /**
@@ -252,6 +252,66 @@ public class InjuryCaptain {
      */
     public void setInjuredSpeed(Player player, float walkSpeed) {
         this.setInjuredSpeed(player.getUniqueId(), walkSpeed);
+    }
+
+    /**
+     * Sets the baseline walk speed for an injured player.
+     * 
+     * 
+     * @param playerId      id of player to change speed
+     * 
+     * @param walkSpeed     new baseline speed
+     * 
+     */
+    public void setOriginalSpeed(UUID playerId, float walkSpeed) {
+        if (this.trackingPlayer(playerId)) {
+            InjuredPlayer currentPlayer = this.injuredPlayers.get(playerId);
+            currentPlayer.setOriginalSpeed(walkSpeed);
+            this.injuredPlayers.replace(playerId, currentPlayer);
+        }
+    }
+
+    /**
+     * Sets the baseline walk speed for an injured player.
+     * 
+     * 
+     * @param player        player to change speed
+     * 
+     * @param walkSpeed     new baseline speed
+     * 
+     */
+    public void setOriginalSpeed(Player player, float walkSpeed) {
+        this.setOriginalSpeed(player.getUniqueId(), walkSpeed);
+    }
+
+    /**
+     * Updates the baseline and injured speed of a player.
+     * 
+     * 
+     * @param playerId      id of player to update
+     * 
+     * @param walkSpeed     new baseline speed
+     * 
+     */
+    public void updateWalkSpeed(UUID playerId, float walkSpeed) {
+        double multiplier = ((Crippled)this.injuries.get(InjuryType.CRIPPLED)).getSlowPercent();
+        float target = this.hasInjury(playerId, InjuryType.CRIPPLED) ? walkSpeed * (float)multiplier : walkSpeed;
+        this.setInjuredSpeed(playerId, target);
+        this.setOriginalSpeed(playerId, walkSpeed);
+        Bukkit.getPlayer(playerId).setWalkSpeed(walkSpeed * (float)multiplier);
+    }
+
+    /**
+     * Updates the baseline and injured speed of a player.
+     * 
+     * 
+     * @param player        player to update
+     * 
+     * @param walkSpeed     new baseline speed
+     * 
+     */
+    public void updateWalkSpeed(Player player, float walkSpeed) {
+        this.updateWalkSpeed(player.getUniqueId(), walkSpeed);
     }
 
     /**
