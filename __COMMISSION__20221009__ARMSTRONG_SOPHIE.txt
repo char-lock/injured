@@ -91,3 +91,6 @@ player.spawnParticle(Particle.REDSTONE, where, bleedParticleCount);
 >> Add duration.
 >> Add crippling injury
 >> Add "splint" as cure for crippling.
+
+
+>> Speed is being reset every tick by another plugin.
