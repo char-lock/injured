@@ -1,6 +1,7 @@
 package io.github.charlock.injured.event.listener;
 
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -23,50 +24,42 @@ public class InjuryHealListener implements Listener {
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e) {
-        ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
-        if (heldItem != null && heldItem.getItemMeta() != null) {
-            if (heldItem.getItemMeta().hasDisplayName()) {
-                String itemLabel = heldItem.getItemMeta().displayName().toString().toLowerCase();
-                // Remedy Labels
-                String bandageLabel = this.injuredPlugin.getConfig().getString("remedies.bandage.label").toLowerCase();
-                String splintLabel = this.injuredPlugin.getConfig().getString("remedies.splint.label").toLowerCase();
-                if (heldItem.getType() == Material.PAPER && itemLabel.contains(bandageLabel)) {
-                    this.injuredPlugin.debugInfo(
-                        "(InjuryHealListener) " + e.getPlayer().getName()
-                        + " is holding the proper remedy for [bleeding]."
-                        + " Checking if they have the injury ..."
-                    );
-                    if (this.injuryCaptain.hasInjury(e.getPlayer().getUniqueId(), InjuryType.BLEEDING)) {
-                        this.injuredPlugin.debugInfo(
-                            "(InjuryHealListener) " + e.getPlayer().getName()
-                            + " is bleeding. Applying remedy and removing"
-                            + " 1 from their inventory ..."
-                        );
-                        this.injuryCaptain.getInjuryMapping().get(InjuryType.BLEEDING).sendRemedyMessage(e.getPlayer());
-                        this.injuryCaptain.removeInjury(e.getPlayer().getUniqueId(), InjuryType.BLEEDING);
-                        heldItem.setAmount(heldItem.getAmount() - 1);
-                    }
-                } else if (heldItem.getType() == Material.STICK && itemLabel.contains(splintLabel)) {
-                    this.injuredPlugin.debugInfo(
-                        "(InjuryHealListener) " + e.getPlayer().getName()
-                        + " is holding the proper remedy for [crippled]."
-                        + " Checking if they have the injury ..." 
-                    );
-                    if (this.injuryCaptain.hasInjury(e.getPlayer().getUniqueId(), InjuryType.CRIPPLED)) {
-                        this.injuredPlugin.debugInfo(
-                            "(InjuryHealListener) " + e.getPlayer().getName()
-                            + " is crippled. Applying remedy and removing"
-                            + " 1 from their inventory ..."
-                        );
-                        this.injuryCaptain.getInjuryMapping().get(InjuryType.CRIPPLED).sendRemedyMessage(e.getPlayer());
-                        float originalSpeed = this.injuryCaptain.getOriginalSpeed(e.getPlayer().getUniqueId());
-                        this.injuryCaptain.setInjuredSpeed(e.getPlayer().getUniqueId(), originalSpeed);
-                        e.getPlayer().setWalkSpeed(originalSpeed);
-                        this.injuryCaptain.removeInjury(e.getPlayer().getUniqueId(), InjuryType.CRIPPLED);
-                        heldItem.setAmount(heldItem.getAmount() - 1);
-                    }
-                }
-            }
+        Player targetPlayer = e.getPlayer();
+        ItemStack heldItem = targetPlayer.getInventory().getItemInMainHand();
+        // Nothing needs to occur if the player is not holding an appropriately
+        // defined item.
+        if (heldItem == null || heldItem.getItemMeta() == null) return;
+        String itemLabel = heldItem.getItemMeta().displayName().toString().toLowerCase();
+        // Handling cure for the `Bleeding` injury.
+        String bandageLabel = this.injuredPlugin.getConfig()
+            .getString("remedies.bandage.label").toLowerCase();
+        boolean isHoldingBandage = heldItem.getType() == Material.PAPER
+            && itemLabel.contains(bandageLabel);
+        boolean isBleeding = this.injuryCaptain.hasInjury(targetPlayer, InjuryType.BLEEDING);
+        if (isBleeding && isHoldingBandage) {
+            // TODO: Find a less convoluted way to do this.
+            this.injuryCaptain.getInjuryMapping().get(InjuryType.BLEEDING)
+                .sendRemedyMessage(targetPlayer);
+            this.injuryCaptain.removeInjury(targetPlayer, InjuryType.BLEEDING);
+            heldItem.setAmount(heldItem.getAmount() - 1);
+        }
+        // Handling cure for the `Crippled` injury.
+        String splintLabel = this.injuredPlugin.getConfig()
+            .getString("remedies.splint.label").toLowerCase();
+        boolean isHoldingSplint = heldItem.getType() == Material.STICK
+            && itemLabel.contains(splintLabel);
+        boolean isCrippled = this.injuryCaptain.hasInjury(targetPlayer, InjuryType.CRIPPLED);
+        if (isCrippled && isHoldingSplint) {
+            // TODO: Find a less convoluted way to do this.
+            this.injuryCaptain.getInjuryMapping().get(InjuryType.CRIPPLED)
+                .sendRemedyMessage(targetPlayer);
+            float slowPercent = (float)this.injuredPlugin.getConfig()
+                .getDouble("injuries.crippled.slowPercent");
+            float originalSpeed = targetPlayer.getWalkSpeed() / slowPercent;
+            targetPlayer.setWalkSpeed(originalSpeed);
+            this.injuryCaptain.removeInjury(targetPlayer, InjuryType.CRIPPLED);
+            heldItem.setAmount(heldItem.getAmount() - 1);
         }
     }
+
 }

@@ -2,6 +2,7 @@ package io.github.charlock.injured.event.listener;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -20,36 +21,33 @@ import io.github.charlock.injured.injury.InjuryType;
  * 
 */
 public class InjuryDeathListener implements Listener {
+
     private InjuryCaptain injuryCaptain = InjuryCaptain.getCaptain();
     private InjuredPlugin injuredPlugin = injuryCaptain.getPlugin();
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerDeath(PlayerDeathEvent e) {
-        if (e.deathMessage().toString().contains("death.attack.generic")) {
-            this.injuredPlugin.debugInfo(
-                "(InjuryDeathListener) " + e.getEntity().getName()
-                + " was killed by a generic attack. Checking injuries ..."
-            );
-            if (injuryCaptain.hasInjury(e.getEntity(), InjuryType.BLEEDING)) {
-                this.injuredPlugin.debugInfo(
-                    "(InjuryDeathListener) "
-                    + e.getEntity().getName() + " was bleeding at the time"
-                    + " of death; changing death message ..."
-                );
-                TextComponent deathMessage = Component.text(
-                    e.getEntity().getName() + " has bled out."
-                );
-                e.deathMessage(deathMessage);
-            }
+        Player deadPlayer = e.getEntity();
+        // We need to check generic deaths to see if the player died via bleeding.
+        // This will allow us to swap out the message to be more appropriate.
+        boolean isGenericDeath = e.deathMessage().toString().contains("death.attack.generic");
+        boolean wasPlayerBleeding = this.injuryCaptain.hasInjury(deadPlayer, InjuryType.BLEEDING);
+        if (isGenericDeath && wasPlayerBleeding) {
+            String playerName = deadPlayer.getName();
+            TextComponent deathMessage = Component.text(playerName + " has bled out.");
+            e.deathMessage(deathMessage);
         }
-
-        if (this.injuryCaptain.trackingPlayer(e.getEntity())) {
-            this.injuredPlugin.debugInfo("Clearing all injuries from " + e.getEntity().getName() + " ...");
-            if (this.injuryCaptain.hasInjury(e.getEntity(), InjuryType.CRIPPLED)) {
-                float slowPercent = (float)this.injuredPlugin.getConfig().getDouble("injuries.crippled.slowPercent");
-                e.getEntity().setWalkSpeed(e.getEntity().getWalkSpeed() / slowPercent);
-            }
-            this.injuryCaptain.clearInjuries(e.getEntity());
+        // This is a special check to fix a crippled player's walk speed.
+        boolean wasPlayerCrippled = this.injuryCaptain.hasInjury(deadPlayer, InjuryType.CRIPPLED);
+        if (wasPlayerCrippled) {
+            float slowPercent = (float)this.injuredPlugin.getConfig().getDouble("injuries.crippled.slowPercent");
+            float correctedWalkSpeed = deadPlayer.getWalkSpeed() / slowPercent;
+            deadPlayer.setWalkSpeed(correctedWalkSpeed);
         }
+        // We need to clear the player of all injuries now that they have died.
+        // At least, if we were tracking them.
+        boolean isTrackingInjuries = this.injuryCaptain.trackingPlayer(deadPlayer);
+        if (isTrackingInjuries) this.injuryCaptain.clearInjuries(deadPlayer);
     }
+
 }

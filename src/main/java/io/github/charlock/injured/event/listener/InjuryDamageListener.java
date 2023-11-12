@@ -5,6 +5,9 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+
+import java.util.Collection;
+
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
@@ -29,52 +32,45 @@ public class InjuryDamageListener implements Listener {
         injuredPlugin = this.injuryCaptain.getPlugin();
     }
 
+    private void debugInfo(String msg) {
+        this.injuredPlugin.debugInfo("(InjuryDamageListener) " + msg);
+    }
+
+    private Collection<Injury> getDefinedInjuries() {
+        return this.injuryCaptain.getInjuryMapping().values();
+    }
+
     @EventHandler(priority = EventPriority.NORMAL)
     public void onEntityDamage(EntityDamageEvent e) {
-        if (e.getEntity().getType() == EntityType.PLAYER) {
-            this.injuredPlugin.debugInfo(
-                "(InjuryDamageListener) Confirmed entity was a player. "
-                + "Checking injuries against cause ..."
-            );
-            for (Injury i : this.injuryCaptain.getInjuryMapping().values()) {
-                this.injuredPlugin.debugInfo(
-                    "(InjuryDamageListener) Checking if we should roll"
-                    + " for [" + i.getName() + "] ..."
-                );
-                if (i.getCauses().contains(e.getCause())) {
-                    if (i.getType() == InjuryType.CRIPPLED && e.getCause() == DamageCause.FALL && e.getEntity().getFallDistance() < 6) {
-                        this.injuredPlugin.debugInfo(
-                            "(InjuryDamageListener) "
-                            + ((Player)e.getEntity()).getName()
-                            + " has not fallen enough blocks to be injured."
-                        );
-                    } else {
-                        this.injuredPlugin.debugInfo(
-                            "(InjuryDamageListener) "
-                            + ((Player)e.getEntity()).getName()
-                            + " has been hit by a damage that could cause ["
-                            + i.getName() + "]. Rolling ..."
-                        );
-                        if (i.rollInjury()) {
-                            this.injuredPlugin.debugInfo(
-                                "(InjuryDamageListener) Uh oh -- "
-                                + ((Player)e.getEntity()).getName()
-                                + " has rolled low enough to be injured with ["
-                                + i.getName() + "]. Adding ..."
-                            );
-                            this.injuryCaptain.addInjury(((Player)e.getEntity()).getUniqueId(), i);
-                            i.sendInjuryMessage((Player)e.getEntity());
-                        } else {
-                            this.injuredPlugin.debugInfo(
-                                "(InjuryDamageListener) Phew! "
-                                + ((Player)e.getEntity()).getName()
-                                + " rolled high enough not to be injured by ["
-                                + i.getName() + "]."
-                            );
-                        }
-                    }
-                }
+        if (e.getEntity().getType() != EntityType.PLAYER) return;
+        this.debugInfo("Confirmed entity was a player. Checking injuries against cause ...");
+        Player injuredPlayer = (Player)e.getEntity();
+        String injuredName = injuredPlayer.getName();
+        boolean playerFell = e.getCause() == DamageCause.FALL;
+        boolean wasFallHighEnough = playerFell && injuredPlayer.getFallDistance() >= 6;
+        // TODO: Rewrite the injury check to use a dictionary lookup of cause to injury.
+        for (Injury knownInjury : this.getDefinedInjuries()) {
+            // We can move on if the injury doesn't have the cause we're looking for.
+            if (!knownInjury.getCauses().contains(e.getCause())) continue;
+            // Special check for the `Crippled` injury to ensure the height was high enough.
+            if (knownInjury.getType() == InjuryType.CRIPPLED && playerFell && !wasFallHighEnough) {
+                this.debugInfo(injuredName + " fell, but it was not high enough to cause injury.");
+                continue;
             }
+            this.debugInfo("Phew! " + injuredName
+                + " has been hit by a damage that could cause ["
+                + knownInjury.getName() + "]. Rolling ...");
+            boolean isInjured = knownInjury.rollInjury();
+            if (!isInjured) {
+                this.debugInfo(injuredName + " rolled high enough not to be injured by ["
+                    + knownInjury.getName() + "].");
+                continue;
+            }
+            this.debugInfo(injuredName
+                + " rolled low enough to be injured with ["
+                + knownInjury.getName() + "]. Adding ...");
+            this.injuryCaptain.addInjury(injuredPlayer.getUniqueId(), knownInjury);
+            knownInjury.sendInjuryMessage(injuredPlayer);
         }
     }
 }
